@@ -1,0 +1,74 @@
+### Verificação Geral da Estrutura do Banco de Dados
+
+O arquivo Excel descreve um esquema relacional para um banco de dados de um aplicativo de delivery de comida, com foco em entidades como usuários, restaurantes, pedidos, pagamentos e entregas. No geral, a estrutura está **bem organizada e cobre os principais fluxos de um app de delivery** (cadastro de usuários e restaurantes, gerenciamento de menus e pratos, carrinho, pedidos, pagamentos, entregas e avaliações). Ela segue princípios de normalização (3NF em grande parte), com tabelas separadas para relacionamentos N:N (ex.: itens_pedido) e uso de chaves estrangeiras implícitas.
+
+No entanto, há algumas **inconsistências menores em nomenclatura e referências**, além de **tabelas ausentes** que podem quebrar a integridade referencial. Não há erros graves que impeçam o funcionamento básico, mas ajustes são recomendados para robustez, escalabilidade e conformidade com boas práticas (ex.: SQL standards).
+
+Abaixo, listo as inconsistências identificadas e sugestões de melhorias. Usei uma tabela para resumir as inconsistências por tabela, facilitando a visualização.
+
+### Inconsistências Identificadas
+
+| Tabela (Sheet) | Inconsistência | Descrição | Impacto |
+|---------------|----------------|-----------|---------|
+| carrinho_usuario (3) | Nomenclatura inconsistente | Coluna "preco unitario" (espaços e minúscula) vs. padrão "preco_unitario" em itens_pedido. "update_at" sem "d". | Baixo: Afeta apenas legibilidade e queries. Pode causar erros em scripts de migração. |
+| restaurantes (5) | Nomenclatura | "update_at" sem "d" (deve ser "updated_at"). | Baixo: Inconsistente com outras tabelas como usuarios. |
+| formas_de_pagamento (8) | Chave estrangeira ausente | Referencia "forma_pagamento_id", mas não há tabela "formas_pagamento" (lookup para tipos como "cartão", "pix", etc.). | Médio: Quebra integridade; IDs órfãos em inserts. |
+| pratos (11) | Referência de FK | "categoria_id" refere-se a "categoria_menu.id", mas nomes não explicitam (ok, mas ambíguo). | Baixo: Pode confundir desenvolvedores. |
+| pagamentos (16) | Nomenclatura de FK | "pedidos_id" (plural) vs. padrão "pedido_id" (singular, como em outras tabelas). | Baixo: Inconsistente; afeta JOINs. |
+| entregas (17) | Chave estrangeira ausente | "entregador_id" refere-se a uma tabela "entregadores" inexistente (para motoristas/entregadores). | Médio: Essencial para rastrear entregas; sem ela, campo inútil. |
+| Geral (todas) | Ausência de constraints | Não menciona UNIQUE (ex.: email em usuarios, cnpj em restaurantes) ou NOT NULL em campos obrigatórios (ex.: nome). | Médio: Risco de duplicatas ou dados inválidos. |
+| Geral (todas) | Timestamps incompletos | Algumas tabelas faltam "updated_at" (ex.: pratos, itens_pedido). | Baixo: Dificulta auditoria. |
+| Planilha24 (23) | Tabela vazia | Sem colunas definidas; parece placeholder. | Baixo: Ignorar ou remover. |
+
+Outras observações menores:
+- **Contatos e Imagens**: Usam modelo polimórfico (entidade_id + tipo_entidade), o que é bom para flexibilidade (usuários e restaurantes compartilham), mas exige índices compostos para performance.
+- **Cupons**: São globais (não por restaurante), mas "cupons_usuario" tem "usos_restaurante" – inconsistente se cupons forem universais; pode levar a contagens erradas.
+- **Endereços**: Duplicação de estrutura em endereco_usuario e endereco_restaurante (poderia ser unificado, mas ok para simplicidade).
+- **Promocoes**: Permite promo por prato ou restaurante (bom), mas sem validação de sobreposição (ex.: múltiplas promos ativas no mesmo prato).
+
+### Sugestões para Estruturação do Banco de Dados
+
+Para melhorar, sugiro **refinamentos incrementais** mantendo o esquema atual. O foco é em integridade, performance e extensibilidade. Assumo um SGBD como PostgreSQL ou MySQL, com suporte a JSON para campos flexíveis (ex.: customizacoes).
+
+#### 1. **Correções Imediatas (Baixo Esforço)**
+   - Padronize nomenclatura: Use snake_case (ex.: "preco_unitario", "updated_at") em todas as colunas. Remova espaços.
+   - Corrija FKs: "pedidos_id" → "pedido_id"; adicione comentários no Excel para explicitar referências (ex.: "categoria_id REFERENCES categoria_menu(id)").
+   - Remova ou ignore Planilha24.
+
+#### 2. **Adições de Tabelas Ausentes (Essencial)**
+   Adicione essas tabelas para completar o esquema. Elas são derivadas das referências existentes.
+
+   | Tabela Nova | Colunas Sugeridas | Justificativa |
+   |-------------|-------------------|--------------|
+   | formas_pagamento | id (PK), nome (ex.: "Cartão Crédito"), icone_url, ativo, created_at, updated_at | Lookup para tipos de pagamento. Adicione em formas_de_pagamento: FK para esta tabela. |
+   | entregadores | id (PK), nome, email, senha_hash, cpf, data_nascimento, veiculo_tipo, ativo, created_at, updated_at | Similar a "usuarios", mas para motoristas. Adicione FK em entregas. Pode herdar de uma base "pessoas" se quiser unificar. |
+   | categorias_globais (opcional) | id (PK), nome (ex.: "Hambúrgueres"), descricao, ordem, created_at | Se categorias de pratos forem reutilizáveis entre menus; senão, mantenha por menu. |
+
+#### 3. **Melhorias em Tabelas Existentes**
+   Use esta tabela para sugestões por entidade principal:
+
+   | Tabela | Sugestões de Colunas Adicionais/Alterações | Razão |
+   |--------|-------------------------------------------|-------|
+   | usuarios | Adicione: telefone (VARCHAR), foto_url (VARCHAR). UNIQUE(email). | Contato básico; evita duplicatas. Integre com contatos se polimórfico. |
+   | restaurantes | Adicione: telefone (VARCHAR), logo_url (VARCHAR). UNIQUE(cnpj). | Essencial para app; use imagens para galeria. |
+   | pratos | Adicione: calorias (DECIMAL), ingredientes (JSON). updated_at. | Suporte a filtros nutricionais; campos flexíveis. |
+   | carrinho_usuario | Adicione: data_expiracao (TIMESTAMP). Remova subtotal (calcule on-the-fly). | Evita carrinhos "eternos"; previne inconsistências de preço. |
+   | pedidos | Adicione: cupom_id (FK para cupons, NULLABLE). | Para aplicar descontos de cupom. |
+   | itens_pedido | Adicione: updated_at. | Auditoria. |
+   | pagamentos | Adicione: metodo_detalhes (JSON, ex.: { "parcelas": 3 }). | Flexibilidade para gateways como Stripe/PagSeguro. |
+   | entregas | Adicione: tempo_real (INT, em minutos). | Rastreamento preciso. |
+   | cupons_usuario | Adicione: data_ultimo_uso (TIMESTAMP). | Melhor tracking de uso. |
+   | Geral | Adicione em todas: deleted_at (TIMESTAMP, para soft delete). Indexes em FKs (ex.: usuario_id). | Escalabilidade; evita deleções hard. |
+
+#### 4. **Boas Práticas Gerais**
+   - **Normalização e Relacionamentos**: O esquema está bom (sem redundâncias graves), mas adicione chaves estrangeiras explícitas no SGBD (ex.: FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE). Para N:N, como pratos x promoções, está ok via FKs.
+   - **Performance**: Indexes compostos em queries comuns (ex.: pedidos por status + created_at). Use ENUM para status (ex.: 'pendente', 'preparando') em vez de VARCHAR.
+   - **Segurança/Privacidade**: Hash de senhas já ok (senha_hash). Adicione GDPR-like: consentimento em usuarios. Para entregas, anonimize latitude/longitude após uso.
+   - **Extensibilidade**: Campos JSON para customizacoes (itens_pedido) e observacoes são ótimos. Para menus, adicione suporte a sub-categorias se crescer.
+   - **Migração**: Gere o schema SQL a partir do Excel (use ferramentas como dbdiagram.io). Teste com dados fictícios para validar JOINs (ex.: pedido → itens → pratos → restaurante).
+   - **Outras Ideias**: 
+     - Tabela "logs" genérica para auditoria (ex.: ação, entidade_id, usuario_id).
+     - Integração com notificacoes: Trigger para enviar push ao status de pedido mudar.
+     - Se o app crescer, considere sharding por restaurante_id.
+
+Essa estrutura refinada tornará o BD mais robusto para um MVP de delivery. Se precisar de um diagrama ER ou SQL exportado, forneça mais detalhes!
