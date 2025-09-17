@@ -14,4 +14,3 @@ class readEnv {
         return $_ENV;
     }
 }
-
