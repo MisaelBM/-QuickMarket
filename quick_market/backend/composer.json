@@ -1,0 +1,14 @@
+{
+  "name": "quickmarket/app",
+  "description": "Simple routing system with Composer autoloading",
+  "type": "project",
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Config\\": "config/"
+    }
+  }
+}
+
+
