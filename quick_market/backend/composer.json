@@ -1,18 +1,5 @@
 {
-  "name": "quickmarket/app",
-  "description": "Simple routing system with Composer autoloading",
-  "type": "project",
-  "autoload": {
-    "psr-4": {
-      "App\\": "app/",
-      "Config\\": "config/"
+    "autoload": {
+        "psr-4": {"Acme\\": "src/"}
     }
-  },
-  "require-dev": {
-    "fakerphp/faker": "^1.24"
-  },
-  "scripts": {
-    "seed": "php scripts/seed.php",
-    "seed:fresh": "php scripts/seed.php --fresh"
-  }
 }
