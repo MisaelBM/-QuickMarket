@@ -15,19 +15,19 @@ class Order {
     public function create(array $payload): array
     {
         $numero = $payload['numero_pedido'] ?? 'PED-' . strtoupper(bin2hex(random_bytes(4)));
-        $sql = "INSERT INTO pedidos (usuario_id, restaurante_id, numero_pedido, status, total, frete, desconto_aplicado, observacoes)
-                VALUES (:uid, :rid, :num, :status, :total, :frete, :desc, :obs)";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':uid' => (int)$payload['usuario_id'],
-            ':rid' => (int)$payload['restaurante_id'],
-            ':num' => $numero,
-            ':status' => $payload['status'] ?? 'pendente',
-            ':total' => (float)($payload['total'] ?? 0),
-            ':frete' => (float)($payload['frete'] ?? 0),
-            ':desc' => (float)($payload['desconto_aplicado'] ?? 0),
-            ':obs' => $payload['observacoes'] ?? null,
-        ]);
+    $sql = "INSERT INTO pedidos (usuario_id, mercado_id, numero_pedido, status, total, frete, desconto_aplicado, observacoes)
+        VALUES (:uid, :mid, :num, :status, :total, :frete, :desc, :obs)";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([
+        ':uid' => (int)$payload['usuario_id'],
+        ':mid' => (int)$payload['mercado_id'],
+        ':num' => $numero,
+        ':status' => $payload['status'] ?? 'pendente',
+        ':total' => (float)($payload['total'] ?? 0),
+        ':frete' => (float)($payload['frete'] ?? 0),
+        ':desc' => (float)($payload['desconto_aplicado'] ?? 0),
+        ':obs' => $payload['observacoes'] ?? null,
+    ]);
         $id = (int)$this->db->lastInsertId();
         $pedido = $this->findById($id);
         return $pedido ?? ['id' => $id, 'numero_pedido' => $numero];

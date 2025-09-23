@@ -24,11 +24,11 @@ class Cart {
         $this->db->beginTransaction();
         $del = $this->db->prepare("DELETE FROM carrinho_usuario WHERE usuario_id = :uid");
         $del->execute([':uid' => $userId]);
-        $ins = $this->db->prepare("INSERT INTO carrinho_usuario (usuario_id, prato_id, quantidade, observacoes, preco_unitario) VALUES (:uid, :pid, :qtd, :obs, :preco)");
+        $ins = $this->db->prepare("INSERT INTO carrinho_usuario (usuario_id, produto_id, quantidade, observacoes, preco_unitario) VALUES (:uid, :pid, :qtd, :obs, :preco)");
         foreach ($items as $it) {
             $ins->execute([
                 ':uid' => $userId,
-                ':pid' => (int)($it['prato_id'] ?? 0),
+                ':pid' => (int)($it['produto_id'] ?? 0),
                 ':qtd' => (int)($it['quantidade'] ?? 1),
                 ':obs' => $it['observacoes'] ?? null,
                 ':preco' => (float)($it['preco_unitario'] ?? 0),
@@ -39,10 +39,10 @@ class Cart {
 
     public function addItem(int $userId, array $item): array
     {
-        $stmt = $this->db->prepare("INSERT INTO carrinho_usuario (usuario_id, prato_id, quantidade, observacoes, preco_unitario) VALUES (:uid, :pid, :qtd, :obs, :preco)");
+        $stmt = $this->db->prepare("INSERT INTO carrinho_usuario (usuario_id, produto_id, quantidade, observacoes, preco_unitario) VALUES (:uid, :pid, :qtd, :obs, :preco)");
         $stmt->execute([
             ':uid' => $userId,
-            ':pid' => (int)($item['prato_id'] ?? 0),
+            ':pid' => (int)($item['produto_id'] ?? 0),
             ':qtd' => (int)($item['quantidade'] ?? 1),
             ':obs' => $item['observacoes'] ?? null,
             ':preco' => (float)($item['preco_unitario'] ?? 0),

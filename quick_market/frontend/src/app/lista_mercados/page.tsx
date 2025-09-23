@@ -1,33 +1,45 @@
+"use client";
+
 import * as React from "react";
+import { useEffect, useState } from "react";
 import HeaderBar from "@/components/ui/headerBar";
+import api from "@/lib/api";
+
+type Mercado = {
+    id: number;
+    nome: string;
+    endereco: string;
+    avaliacao: number;
+    ofertas: number;
+    imagem: string;
+};
 
 export default function ListaMercadosPage() {
-    const mercados = [
-        {
-            id: 1,
-            nome: "Extra",
-            endereco: "Rua das Flores, 123",
-            avaliacao: 4.5,
-            ofertas: 12,
-            imagem: "/imgSupermercados/extra.png"
-        },
-        {
-            id: 2,
-            nome: "Pão de Açúcar",
-            endereco: "Av. Brasil, 456",
-            avaliacao: 4.0,
-            ofertas: 8,
-            imagem: "imgSupermercados/paodeacucar.png"
-        },
-        {
-            id: 3,
-            nome: "Walmart",
-            endereco: "Praça Central, 789",
-            avaliacao: 5.0,
-            ofertas: 15,
-            imagem: "imgSupermercados/walmart.png"
-        },
-    ];
+    const [mercados, setMercados] = useState<Mercado[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        type BackendMercado = Mercado & { rua?: string };
+        api.get<BackendMercado[]>("/Database/Seeders/MercadosSeeder.php")
+            .then((res) => {
+                setMercados(
+                    res.data.map((item) => ({
+                        id: item.id,
+                        nome: item.nome,
+                        endereco: item.endereco || item.rua || "",
+                        avaliacao: item.avaliacao || 4,
+                        ofertas: item.ofertas || 0,
+                        imagem: item.imagem || "/imgSupermercados/extra.png"
+                    }))
+                );
+                setLoading(false);
+            })
+            .catch(() => {
+                setError("Erro ao carregar mercados");
+                setLoading(false);
+            });
+    }, []);
 
     const getStars = (rating: number) => {
         const full = Math.floor(rating);
@@ -41,12 +53,15 @@ export default function ListaMercadosPage() {
             </span>
         );
     };
+
     return (
         <>
             <HeaderBar />
             <main className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-200 py-10 px-2">
                 <section className="max-w-5xl mx-auto flex flex-col gap-8">
                     <h1 className="text-3xl font-extrabold text-blue-700 mb-2 drop-shadow text-center">Mercados próximos de você</h1>
+                    {loading && <div className="text-center">Carregando...</div>}
+                    {error && <div className="text-center text-red-500">{error}</div>}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {mercados.map((mercado) => (
                             <div key={mercado.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center p-5 hover:shadow-2xl transition">
@@ -68,4 +83,4 @@ export default function ListaMercadosPage() {
             </main>
         </>
     );
-};
+}

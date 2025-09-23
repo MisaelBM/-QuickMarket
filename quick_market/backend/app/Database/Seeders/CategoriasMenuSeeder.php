@@ -22,7 +22,7 @@ final class CategoriasMenuSeeder extends Seeder
             for ($i = 0; $i < $qtd; $i++) {
                 $stmtMenu->execute([
                     ':menu_id' => $m['id'],
-                    ':nome' => $this->faker->randomElement(['Entradas', 'Pratos Principais', 'Combos', 'Promoções']),
+                    ':nome' => $this->faker->randomElement(['Entradas', 'Produtos Principais', 'Combos', 'Promoções']),
                     ':descricao' => $this->faker->optional()->sentence(5),
                     ':ordem' => $i,
                 ]);

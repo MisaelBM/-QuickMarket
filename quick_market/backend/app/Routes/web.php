@@ -2,7 +2,7 @@
 use App\Routes\Route;
 use App\Handlers\readEnv;
 use App\Controllers\AuthController;
-use App\Controllers\RestaurantController;
+use App\Controllers\MercadoController;
 use App\Controllers\CartController;
 use App\Controllers\PaymentController;
 use App\Controllers\OrderController;
@@ -22,12 +22,12 @@ Route::addRoute('/auth/login', 'POST', [AuthController::class, 'login']);
 Route::addRoute('/auth/me', 'GET', [AuthController::class, 'me']);
 Route::addRoute('/auth/logout', 'POST', [AuthController::class, 'logout']);
 
-// Restaurants
-Route::addRoute('/restaurants', 'GET', [RestaurantController::class, 'nearby']);
-Route::addRoute('/restaurants/menus', 'GET', [RestaurantController::class, 'menus']);
-Route::addRoute('/restaurants/dishes', 'GET', [RestaurantController::class, 'dishes']);
-Route::addRoute('/restaurants/payments', 'GET', [RestaurantController::class, 'paymentMethods']);
-Route::addRoute('/restaurants/promotions', 'GET', [RestaurantController::class, 'promotions']);
+// Mercados
+Route::addRoute('/mercados', 'GET', [MercadoController::class, 'nearby']);
+Route::addRoute('/mercados/menus', 'GET', [MercadoController::class, 'menus']);
+Route::addRoute('/mercados/produtos', 'GET', [MercadoController::class, 'produtos']);
+Route::addRoute('/mercados/payments', 'GET', [MercadoController::class, 'paymentMethods']);
+Route::addRoute('/mercados/promotions', 'GET', [MercadoController::class, 'promotions']);
 
 // Cart CRUD and item operations
 Route::addRoute('/cart', 'GET', [CartController::class, 'index']);

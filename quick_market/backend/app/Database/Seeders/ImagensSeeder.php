@@ -6,27 +6,27 @@ final class ImagensSeeder extends Seeder
 {
     public function run(): void
     {
-        $restaurantes = $this->db->query('SELECT id FROM restaurantes')->fetchAll();
-        $pratos = $this->db->query('SELECT id FROM pratos')->fetchAll();
+    $mercados = $this->db->query('SELECT id FROM mercados')->fetchAll();
+    $produtos = $this->db->query('SELECT id FROM produtos')->fetchAll();
         $promocoes = $this->db->query('SELECT id FROM promocoes')->fetchAll();
 
         $stmt = $this->db->prepare('INSERT INTO imagens (entidade_id, tipo_entidade, url, legenda, ordem) VALUES (:id, :tipo, :url, :legenda, :ordem)');
 
-        foreach ($restaurantes as $r) {
+        foreach ($mercados as $m) {
             $stmt->execute([
-                ':id' => $r['id'],
-                ':tipo' => 'restaurante',
-                ':url' => $this->faker->imageUrl(800, 600, 'business', true, 'restaurante'),
+                ':id' => $m['id'],
+                ':tipo' => 'mercado',
+                ':url' => $this->faker->imageUrl(800, 600, 'business', true, 'mercado'),
                 ':legenda' => $this->faker->optional()->sentence(5),
                 ':ordem' => 0,
             ]);
         }
 
-        foreach ($pratos as $p) {
+        foreach ($produtos as $p) {
             $stmt->execute([
                 ':id' => $p['id'],
-                ':tipo' => 'prato',
-                ':url' => $this->faker->imageUrl(640, 480, 'food', true, 'prato'),
+                ':tipo' => 'produto',
+                ':url' => $this->faker->imageUrl(640, 480, 'food', true, 'produto'),
                 ':legenda' => $this->faker->optional()->sentence(5),
                 ':ordem' => 0,
             ]);

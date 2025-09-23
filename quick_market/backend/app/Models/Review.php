@@ -14,16 +14,16 @@ class Review {
 
     public function create(array $payload): array
     {
-        $sql = "INSERT INTO avaliacoes (pedido_id, restaurante_id, nota_estrelas, comentario, nota_entrega)
-                VALUES (:pedido, :rest, :estrelas, :comentario, :nota_entrega)";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':pedido' => (int)$payload['pedido_id'],
-            ':rest' => (int)$payload['restaurante_id'],
-            ':estrelas' => (int)($payload['nota_estrelas'] ?? 0),
-            ':comentario' => $payload['comentario'] ?? null,
-            ':nota_entrega' => (int)($payload['nota_entrega'] ?? 0),
-        ]);
+    $sql = "INSERT INTO avaliacoes (pedido_id, mercado_id, nota_estrelas, comentario, nota_entrega)
+        VALUES (:pedido, :mercado, :estrelas, :comentario, :nota_entrega)";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([
+        ':pedido' => (int)$payload['pedido_id'],
+        ':mercado' => (int)$payload['mercado_id'],
+        ':estrelas' => (int)($payload['nota_estrelas'] ?? 0),
+        ':comentario' => $payload['comentario'] ?? null,
+        ':nota_entrega' => (int)($payload['nota_entrega'] ?? 0),
+    ]);
         $id = (int)$this->db->lastInsertId();
         $row = $this->db->query("SELECT * FROM avaliacoes WHERE id = " . (int)$id)->fetch();
         return $row ?: ['id' => $id];
@@ -33,9 +33,9 @@ class Review {
     {
         $conds = [];
         $params = [];
-        if (isset($filters['restaurante_id'])) {
-            $conds[] = 'restaurante_id = :rid';
-            $params[':rid'] = (int)$filters['restaurante_id'];
+        if (isset($filters['mercado_id'])) {
+            $conds[] = 'mercado_id = :mid';
+            $params[':mid'] = (int)$filters['mercado_id'];
         }
         if (isset($filters['pedido_id'])) {
             $conds[] = 'pedido_id = :pid';

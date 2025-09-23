@@ -14,12 +14,12 @@ final class DatabaseSeeder extends Seeder
         (new FormasPagamentoSeeder())->run();
         (new UsuariosSeeder())->run();
         (new EnderecoUsuarioSeeder())->run();
-        (new RestaurantesSeeder())->run();
+    (new MercadosSeeder())->run();
         (new ContatosSeeder())->run();
         (new MenusSeeder())->run();
         (new CategoriasMenuSeeder())->run();
-        (new PratosSeeder())->run();
-        (new FormasPagamentoRestauranteSeeder())->run();
+    (new ProdutosSeeder())->run();
+    (new FormasPagamentoMercadoSeeder())->run();
         (new CuponsSeeder())->run();
         (new CuponsUsuarioSeeder())->run();
         (new ImagensSeeder())->run();
@@ -39,8 +39,8 @@ final class DatabaseSeeder extends Seeder
     {
         $tables = [
             'avaliacoes','entregas','pagamentos','enderecos_entrega','itens_pedido','pedidos',
-            'promocoes','pratos','categorias_menu','menus','formas_pagamento_restaurante','formas_pagamento',
-            'endereco_restaurante','representantes_legais','restaurantes',
+            'promocoes','produtos','categorias_menu','menus','formas_pagamento_mercado','formas_pagamento',
+            'endereco_mercado','representantes_legais','mercados',
             'notificacoes','cupons_usuario','cupons',
             'sessao_usuario','carrinho_usuario','endereco_usuario','contatos','usuarios','imagens'
         ];

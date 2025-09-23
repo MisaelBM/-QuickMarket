@@ -1,0 +1,23 @@
+{
+  "pages": {
+    "/carrinho/page": [
+      "static/chunks/4cc42_next_dist_521d96bb._.js",
+      "static/chunks/quick_market_frontend_src_app_favicon_ico_mjs_aaa27f0f._.js",
+      "static/chunks/[root-of-the-server]__bbfbdf20._.css",
+      "static/chunks/quick_market_frontend_src_app_layout_tsx_541dbbdb._.js",
+      "static/chunks/4cc42_next_dist_client_components_builtin_global-error_22294f58.js",
+      "static/chunks/4cc42_3bb8d6f6._.js",
+      "static/chunks/quick_market_frontend_src_f3c0ee31._.js",
+      "static/chunks/quick_market_frontend_src_app_carrinho_page_tsx_22294f58._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_9abec0af._.js",
+      "static/chunks/4cc42_next_dist_compiled_react-dom_4c47b55d._.js",
+      "static/chunks/4cc42_next_dist_compiled_next-devtools_index_7462e842.js",
+      "static/chunks/4cc42_next_dist_compiled_84055881._.js",
+      "static/chunks/4cc42_next_dist_client_0e972dfc._.js",
+      "static/chunks/4cc42_next_dist_693666e8._.js",
+      "static/chunks/4cc42_@swc_helpers_cjs_3aec575a._.js",
+      "static/chunks/quick_market_frontend_a0ff3932._.js",
+      "static/chunks/turbopack-quick_market_frontend_573d6c35._.js"
+    ]
+  }
+}

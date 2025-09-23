@@ -18,11 +18,11 @@ class ReviewController {
     public function index()
     {
         $filters = [];
-        if (isset($_GET['restaurante_id'])) {
-            $filters['restaurante_id'] = (int)$_GET['restaurante_id'];
+        if (isset($_GET['mercados_id'])) {
+            $filters['mercados_id'] = (int)$_GET['mercados_id'];
         }
-        if (isset($_GET['pedido_id'])) {
-            $filters['pedido_id'] = (int)$_GET['pedido_id'];
+        if (isset($_GET['pedidos_id'])) {
+            $filters['pedidos_id'] = (int)$_GET['pedidos_id'];
         }
         $data = $this->reviews->list($filters);
         return $this->request->json($data);
@@ -32,7 +32,7 @@ class ReviewController {
     {
         $user = $this->request->requireAuth();
         $payload = $this->request->getJson();
-        $payload['usuario_id'] = (int)$user['id'];
+        $payload['usuarios_id'] = (int)$user['id'];
         $review = $this->reviews->create($payload);
         return $this->request->json(['message' => 'Avaliação criada', 'avaliacao' => $review], 201);
     }
