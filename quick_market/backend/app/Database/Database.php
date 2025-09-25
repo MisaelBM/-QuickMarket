@@ -22,24 +22,24 @@ class Database {
 
     }
 
-    function connect() {
+    public function connect() {
 
     }
 
-    function create (string $table, array $data, string $where = null) {
+    public function create (string $table, array $data, string $where = null) {
 
     }
 
-    function read (string $table, int $id) {
+    public function read (string $table, int $id) {
 
     }
-    function update (string $table, int $id, array $data) {
+
+    public function update (string $table, int $id, array $data) {
 
     }
-    function delete (string $table, int $id) {
+
+    public function delete (string $table, int $id) {
 
     }
 
 }
-
-?>

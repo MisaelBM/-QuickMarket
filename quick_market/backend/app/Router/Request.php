@@ -1,30 +1,25 @@
 <?php 
 
-namespace App\Handlers;
-
-use Exception;
+namespace App\Router;
 
 class Request {
 
-    function geturi() {
+    public function geturi() {
 
     }
-    function getmethod() {
+    public function getmethod() {
 
     }
-    function getJason(){
+    public function getJson(){
 
     }
-    function json($data, int $status) {
+    public function json($data, int $status) {
 
     }
-    function requireAuth() {
+    public function requireAuth() {
 
     }
-    function getBearerToken() {
+    public function getBearerToken() {
 
     }
 }
-
-
-?>

@@ -8,14 +8,12 @@ class Read {
 
     private Connect $db;
 
-    funcion __construct() {
+    public function __construct() {
         $this->db = new Connect();
 
     }
-    funcion read(string $table, int $id = null) {
-        $this->db->disconnect();
+    public function read(string $table, int $id = null) {
+
     }
 
 }
-
-?>

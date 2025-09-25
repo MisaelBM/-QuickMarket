@@ -4,7 +4,7 @@ namespace App\Handlers;
 
 class Exception {
 
-    function throw(string $message) {
+    public function throw(string $message) {
 
     }
 

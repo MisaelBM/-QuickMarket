@@ -11,9 +11,7 @@ class Create {
     }
 
     public function create(string $table, array $data, string $where = null) {
-        $this->db->disconnect();
+        
     }
 
 }
-
-?>

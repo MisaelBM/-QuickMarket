@@ -1,33 +1,27 @@
 <?php
 
-namespace App\Handlers;
+namespace App\Router;
 
-use App\Handlers\Request;
-
-use Exception;
+use App\Router\Request;
 
 class Router {
 
     static private $route;
 
-    function static addRoute(string $uri, string $method, $action) {
+    static public function addRoute(string $uri, string $method, $action) {
 
     }
 
-    function verifyExistRoute(Request $request) ;mixed {
+    public function verifyExistRoute(Request $request): mixed {
 
     }
 
-    function dispatch ($action) :mixed {
+    public function dispatch ($action): mixed {
 
     }
 
-    function findMatchUri(string $uri) {
+    public function findMatchUri(string $uri) {
 
     }
 
 }
-
-
-
-?>

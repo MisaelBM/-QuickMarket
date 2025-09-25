@@ -4,8 +4,8 @@ namespace App\Handlers;
 
 class ReadEnv {
 
-    function getEnv()
+    public function getEnv()
+    {
+    }
 
 }
-
-?>

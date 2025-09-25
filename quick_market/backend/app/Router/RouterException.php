@@ -5,5 +5,3 @@ namespace App\Handlers;
 class RouterException {
 
 }
-
-?>
