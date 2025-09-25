@@ -3,43 +3,45 @@
 namespace App\Database;
 
 use PDO;
-use App\Database\Connect;
-use App\Database\Create;
-use App\Database\Read;
-use App\Database\Update;
-use App\Database\Delete;
 
 class Database {
-
-    private Connect $db;
+    private Connect $connect;
     private Create $create;
     private Read $read;
     private Update $update;
     private Delete $delete;
 
-
-    public function __construct(Connect $connect, Create $create, Read $read, Update $update, Delete $delete) {
-
+    public function __construct()
+    {
+        $this->connect = new Connect();
+        $this->create = new Create();
+        $this->read = new Read();
+        $this->update = new Update();
+        $this->delete = new Delete();
     }
 
-    public function connect() {
-
+    public function getDb(): PDO
+    {
+        return $this->connect->connect();
     }
 
-    public function create (string $table, array $data, string $where = null) {
-
+    public function create(string $table, array $data): int
+    {
+        return $this->create->create($table, $data);
     }
 
-    public function read (string $table, int $id) {
-
+    public function read(string $table, ?string $where = null, array $params = []): array
+    {
+        return $this->read->read($table, $where, $params);
     }
 
-    public function update (string $table, int $id, array $data) {
-
+    public function update(string $table, array $data, string $where, array $params = []): int
+    {
+        return $this->update->update($table, $data, $where, $params);
     }
 
-    public function delete (string $table, int $id) {
-
+    public function delete(string $table, string $where, array $params = []): int
+    {
+        return $this->delete->delete($table, $where, $params);
     }
-
 }

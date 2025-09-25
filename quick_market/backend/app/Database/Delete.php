@@ -1,19 +1,23 @@
-<?php 
+<?php
 
 namespace App\Database;
 
-use App\Database\Connect;
-
 class Delete {
+    private Connect $connect;
 
-    private Connect $db;
-
-    public function __construct() {
-        $this->db = new Connect();
+    public function __construct()
+    {
+        $this->connect = new Connect();
     }
 
-    public function delete(string $table, int $id) {
-
+    public function delete(string $table, string $where, array $params = []): int
+    {
+        $db = $this->connect->connect();
+        $sql = 'DELETE FROM ' . $table . ' WHERE ' . $where;
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount();
     }
-
 }
+
+

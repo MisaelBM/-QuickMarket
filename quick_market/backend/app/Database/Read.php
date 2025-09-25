@@ -1,19 +1,26 @@
-<?php 
+<?php
 
 namespace App\Database;
 
-use App\Database\Connect;
-
 class Read {
+    private Connect $connect;
 
-    private Connect $db;
-
-    public function __construct() {
-        $this->db = new Connect();
-
-    }
-    public function read(string $table, int $id = null) {
-
+    public function __construct()
+    {
+        $this->connect = new Connect();
     }
 
+    public function read(string $table, ?string $where = null, array $params = []): array
+    {
+        $db = $this->connect->connect();
+        $sql = 'SELECT * FROM ' . $table;
+        if ($where) {
+            $sql .= ' WHERE ' . $where;
+        }
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
 }
+
+
