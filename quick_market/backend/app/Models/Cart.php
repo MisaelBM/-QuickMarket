@@ -13,6 +13,9 @@ class Cart {
 
     public function getCart(int $userId): array {
 
+        $cart = $this->db->read("cart", "usuario_id = :uid ORDER BY created_at ASC", [":uid" => $userId]);
+        return $cart ?? [];
+
     }
 
     public function saveCart(int $userId, array $items): void {
