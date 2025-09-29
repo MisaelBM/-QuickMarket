@@ -21,7 +21,7 @@ export default function ListaMercadosPage() {
 
     useEffect(() => {
         type BackendMercado = Mercado & { rua?: string };
-        api.get<BackendMercado[]>("/Database/Seeders/MercadosSeeder.php")
+        api.get<BackendMercado[]>("/mercados/produtos")
             .then((res) => {
                 setMercados(
                     res.data.map((item) => ({

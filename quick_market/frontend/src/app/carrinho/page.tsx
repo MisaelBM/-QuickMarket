@@ -1,43 +1,50 @@
 "use client"
 import * as React from "react";
+import axios from "axios";
 import HeaderBar from "@/components/ui/headerBar";
+import type { ProdutoCarrinho } from "@/types";
 
-const produtosCarrinho = [
-	{
-		id: 1,
-		nome: "Arroz 5kg",
-		preco: 19.99,
-		quantidade: 2,
-		imagem: "/imgCards/card1.jpg",
-	},
-	{
-		id: 2,
-		nome: "Feijão 1kg",
-		preco: 7.49,
-		quantidade: 1,
-		imagem: "/imgCards/card2.jpeg",
-	},
-];
+const fetchCarrinho = async (): Promise<ProdutoCarrinho[]> => {
+	const response = await axios.get("/cart/");
+	return response.data;
+};
 
 export default function CarrinhoPage() {
-	const [carrinho, setCarrinho] = React.useState(produtosCarrinho);
+	const [carrinho, setCarrinho] = React.useState<ProdutoCarrinho[]>([]);
 
-	const alterarQuantidade = (id: number, delta: number) => {
-		setCarrinho((carrinho) =>
-			carrinho.map((item) =>
-				item.id === id
-					? { ...item, quantidade: Math.max(1, item.quantidade + delta) }
-					: item
-			)
-		);
+	React.useEffect(() => {
+		fetchCarrinho().then(setCarrinho);
+	}, []);
+
+	const adicionarItem = async (produto: ProdutoCarrinho) => {
+		try {
+			const response = await axios.post("/cart/", produto);
+			setCarrinho(response.data);
+		} catch (error) {
+			console.error("Erro ao adicionar item:", error);
+		}
 	};
 
-	const removerItem = (id: number) => {
-		setCarrinho((carrinho) => carrinho.filter((item) => item.id !== id));
+	const alterarQuantidade = async (id: number, delta: number) => {
+		try {
+			const response = await axios.put("/cart/items/", { id, delta });
+			setCarrinho(response.data);
+		} catch (error) {
+			console.error("Erro ao alterar quantidade:", error);
+		}
+	};
+
+	const removerItem = async (id: number) => {
+		try {
+			const response = await axios.delete(`/cart/items/remove`, { data: { id } });
+			setCarrinho(response.data);
+		} catch (error) {
+			console.error("Erro ao remover item:", error);
+		}
 	};
 
 	const total = carrinho.reduce(
-		(acc, item) => acc + item.preco * item.quantidade,
+		(acc: number, item: ProdutoCarrinho) => acc + item.preco * item.quantidade,
 		0
 	);
 
@@ -71,7 +78,7 @@ export default function CarrinhoPage() {
 												{item.nome}
 											</span>
 											<span className="text-sm text-gray-500">
-												Preço:{" "}
+												Preço: {" "}
 												<span className="font-semibold text-blue-700">
 													R$ {item.preco.toFixed(2)}
 												</span>
