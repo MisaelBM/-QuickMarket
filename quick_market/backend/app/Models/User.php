@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Database\Database;
 
 class User {
-    private \PDO $db;
+    private \App\Database\SupabaseClient $db;
 
     public function __construct()
     {
@@ -14,18 +14,14 @@ class User {
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE email = :email LIMIT 1");
-        $stmt->execute([':email' => $email]);
-        $user = $stmt->fetch();
-        return $user ?: null;
+        $result = $this->db->select('usuarios', ['email' => $email], ['limit' => 1]);
+        return !empty($result) ? $result[0] : null;
     }
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE id = :id LIMIT 1");
-        $stmt->execute([':id' => $id]);
-        $user = $stmt->fetch();
-        return $user ?: null;
+        $result = $this->db->select('usuarios', ['id' => $id], ['limit' => 1]);
+        return !empty($result) ? $result[0] : null;
     }
 }
 

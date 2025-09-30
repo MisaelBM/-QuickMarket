@@ -14,9 +14,14 @@ final class FormasPagamentoSeeder extends Seeder
             ['nome' => 'Vale Refeição', 'codigo' => 'VR'],
         ];
 
-        $stmt = $this->db->prepare('INSERT INTO formas_pagamento (nome, codigo, ativo) VALUES (:nome, :codigo, 1) ON DUPLICATE KEY UPDATE nome = VALUES(nome), ativo = 1');
         foreach ($data as $item) {
-            $stmt->execute([':nome' => $item['nome'], ':codigo' => $item['codigo']]);
+            $itemData = [
+                'nome' => $item['nome'],
+                'codigo' => $item['codigo'],
+                'ativo' => 1
+            ];
+            
+            $this->insertOrUpdate('formas_pagamento', $itemData, ['nome', 'ativo']);
         }
     }
 }

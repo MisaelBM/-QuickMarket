@@ -6,23 +6,53 @@ final class ContatosSeeder extends Seeder
 {
     public function run(): void
     {
-        $usuarios = $this->db->query('SELECT id, email FROM usuarios')->fetchAll();
-        $restaurantes = $this->db->query('SELECT id FROM restaurantes')->fetchAll();
-        $representantes = $this->db->query('SELECT id FROM representantes_legais')->fetchAll();
+        $usuarios = $this->getAll('usuarios');
+        $mercados = $this->getAll('mercados');
+        $representantes = $this->getAll('representantes_legais');
 
-        $stmt = $this->db->prepare('INSERT INTO contatos (entidade_id, tipo_entidade, tipo_contato, valor, principal) VALUES (:id, :tipo, :tipo_contato, :valor, :principal)');
+        // Contatos dos usuários
+        foreach ($usuarios as $usuario) {
+            $emailData = [
+                'entidade_id' => $usuario['id'],
+                'tipo_entidade' => 'usuario',
+                'tipo_contato' => 'email',
+                'valor' => $usuario['email'],
+                'principal' => 1
+            ];
+            $this->db->insert('contatos', $emailData);
 
-        foreach ($usuarios as $u) {
-            $stmt->execute([':id' => $u['id'], ':tipo' => 'usuario', ':tipo_contato' => 'email', ':valor' => $u['email'], ':principal' => 1]);
-            $stmt->execute([':id' => $u['id'], ':tipo' => 'usuario', ':tipo_contato' => 'telefone', ':valor' => $this->faker->phoneNumber(), ':principal' => 0]);
+            $telefoneData = [
+                'entidade_id' => $usuario['id'],
+                'tipo_entidade' => 'usuario',
+                'tipo_contato' => 'telefone',
+                'valor' => $this->faker->phoneNumber(),
+                'principal' => 0
+            ];
+            $this->db->insert('contatos', $telefoneData);
         }
 
-        foreach ($restaurantes as $r) {
-            $stmt->execute([':id' => $r['id'], ':tipo' => 'restaurante', ':tipo_contato' => 'email', ':valor' => $this->faker->companyEmail(), ':principal' => 1]);
+        // Contatos dos mercados
+        foreach ($mercados as $mercado) {
+            $emailData = [
+                'entidade_id' => $mercado['id'],
+                'tipo_entidade' => 'mercado',
+                'tipo_contato' => 'email',
+                'valor' => $this->faker->companyEmail(),
+                'principal' => 1
+            ];
+            $this->db->insert('contatos', $emailData);
         }
 
-        foreach ($representantes as $rep) {
-            $stmt->execute([':id' => $rep['id'], ':tipo' => 'representante', ':tipo_contato' => 'telefone', ':valor' => $this->faker->cellphoneNumber(), ':principal' => 1]);
+        // Contatos dos representantes
+        foreach ($representantes as $representante) {
+            $telefoneData = [
+                'entidade_id' => $representante['id'],
+                'tipo_entidade' => 'representante',
+                'tipo_contato' => 'telefone',
+                'valor' => $this->faker->cellphoneNumber(),
+                'principal' => 1
+            ];
+            $this->db->insert('contatos', $telefoneData);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Database\Database;
 
 class Cart {
-    private \PDO $db;
+    private \App\Database\SupabaseClient $db;
 
     public function __construct()
     {
@@ -14,46 +14,44 @@ class Cart {
 
     public function getCart(int $userId): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM carrinho_usuario WHERE usuario_id = :uid ORDER BY created_at ASC");
-        $stmt->execute([':uid' => $userId]);
-        return $stmt->fetchAll() ?: [];
+        return $this->db->select('carrinho_usuario', ['usuario_id' => $userId], ['order' => 'created_at.asc']);
     }
 
     public function saveCart(int $userId, array $items): void
     {
-        $this->db->beginTransaction();
-        $del = $this->db->prepare("DELETE FROM carrinho_usuario WHERE usuario_id = :uid");
-        $del->execute([':uid' => $userId]);
-        $ins = $this->db->prepare("INSERT INTO carrinho_usuario (usuario_id, produto_id, quantidade, observacoes, preco_unitario) VALUES (:uid, :pid, :qtd, :obs, :preco)");
-        foreach ($items as $it) {
-            $ins->execute([
-                ':uid' => $userId,
-                ':pid' => (int)($it['produto_id'] ?? 0),
-                ':qtd' => (int)($it['quantidade'] ?? 1),
-                ':obs' => $it['observacoes'] ?? null,
-                ':preco' => (float)($it['preco_unitario'] ?? 0),
-            ]);
+        // Remove todos os itens do carrinho do usuário
+        $this->db->delete('carrinho_usuario', ['usuario_id' => $userId]);
+        
+        // Adiciona os novos itens
+        foreach ($items as $item) {
+            $data = [
+                'usuario_id' => $userId,
+                'produto_id' => (int)($item['produto_id'] ?? 0),
+                'quantidade' => (int)($item['quantidade'] ?? 1),
+                'observacoes' => $item['observacoes'] ?? null,
+                'preco_unitario' => (float)($item['preco_unitario'] ?? 0),
+            ];
+            $this->db->insert('carrinho_usuario', $data);
         }
-        $this->db->commit();
     }
 
     public function addItem(int $userId, array $item): array
     {
-        $stmt = $this->db->prepare("INSERT INTO carrinho_usuario (usuario_id, produto_id, quantidade, observacoes, preco_unitario) VALUES (:uid, :pid, :qtd, :obs, :preco)");
-        $stmt->execute([
-            ':uid' => $userId,
-            ':pid' => (int)($item['produto_id'] ?? 0),
-            ':qtd' => (int)($item['quantidade'] ?? 1),
-            ':obs' => $item['observacoes'] ?? null,
-            ':preco' => (float)($item['preco_unitario'] ?? 0),
-        ]);
+        $data = [
+            'usuario_id' => $userId,
+            'produto_id' => (int)($item['produto_id'] ?? 0),
+            'quantidade' => (int)($item['quantidade'] ?? 1),
+            'observacoes' => $item['observacoes'] ?? null,
+            'preco_unitario' => (float)($item['preco_unitario'] ?? 0),
+        ];
+        
+        $this->db->insert('carrinho_usuario', $data);
         return $this->getCart($userId);
     }
 
     public function removeItem(int $userId, string $cartItemId): array
     {
-        $stmt = $this->db->prepare("DELETE FROM carrinho_usuario WHERE id = :id AND usuario_id = :uid");
-        $stmt->execute([':id' => $cartItemId, ':uid' => $userId]);
+        $this->db->delete('carrinho_usuario', ['id' => $cartItemId, 'usuario_id' => $userId]);
         return $this->getCart($userId);
     }
 }

@@ -6,19 +6,22 @@ final class PagamentosSeeder extends Seeder
 {
     public function run(): void
     {
-        $pedidos = $this->db->query('SELECT id, total FROM pedidos')->fetchAll();
-        $formas = $this->db->query('SELECT id FROM formas_pagamento WHERE ativo = 1')->fetchAll();
-        $stmt = $this->db->prepare('INSERT INTO pagamentos (pedido_id, forma_pagamento_id, valor, status, transacao_id) VALUES (:pid, :fid, :valor, :status, :tx)');
-        foreach ($pedidos as $p) {
+        $pedidos = $this->getAll('pedidos');
+        $formas = $this->getAll('formas_pagamento', ['ativo' => 1]);
+        
+        foreach ($pedidos as $pedido) {
             $forma = $this->faker->randomElement($formas);
             $status = $this->faker->randomElement(['pago','pendente','falhou','reembolsado']);
-            $stmt->execute([
-                ':pid' => $p['id'],
-                ':fid' => $forma['id'],
-                ':valor' => $p['total'],
-                ':status' => $status,
-                ':tx' => strtoupper($this->faker->bothify('TX-########')),
-            ]);
+            
+            $pagamentoData = [
+                'pedido_id' => $pedido['id'],
+                'forma_pagamento_id' => $forma['id'],
+                'valor' => $pedido['total'],
+                'status' => $status,
+                'transacao_id' => strtoupper($this->faker->bothify('TX-########'))
+            ];
+            
+            $this->db->insert('pagamentos', $pagamentoData);
         }
     }
 }

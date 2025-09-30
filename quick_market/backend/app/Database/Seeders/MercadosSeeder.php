@@ -6,45 +6,51 @@ final class MercadosSeeder extends Seeder
 {
     public function run(): void
     {
-    $stmt = $this->db->prepare('INSERT INTO mercados (nome, descricao, cnpj, categoria_principal, tempo_medio_preparo, taxa_entrega, status, ativo) VALUES (:nome, :descricao, :cnpj, :categoria, :tempo, :taxa, :status, 1)');
-
+        // Create mercados
         for ($i = 0; $i < 10; $i++) {
-            $stmt->execute([
-                ':nome' => $this->faker->company(),
-                ':descricao' => $this->faker->sentence(10),
-                ':cnpj' => $this->generateCnpj(),
-                ':categoria' => $this->faker->randomElement(['Pizza', 'Hambúrguer', 'Japonesa', 'Brasileira', 'Saudável']),
-                ':tempo' => $this->faker->numberBetween(15, 60),
-                ':taxa' => $this->faker->randomFloat(2, 0, 20),
-                ':status' => 'aberto',
-            ]);
+            $mercadoData = [
+                'nome' => $this->faker->company(),
+                'descricao' => $this->faker->sentence(10),
+                'cnpj' => $this->generateCnpj(),
+                'categoria_principal' => $this->faker->randomElement(['Pizza', 'Hambúrguer', 'Japonesa', 'Brasileira', 'Saudável']),
+                'tempo_medio_preparo' => $this->faker->numberBetween(15, 60),
+                'taxa_entrega' => $this->faker->randomFloat(2, 0, 20),
+                'status' => 'aberto',
+                'ativo' => 1
+            ];
+            
+            $this->db->insert('mercados', $mercadoData);
         }
 
-        // Representantes e endereços
-    $mercados = $this->db->query('SELECT id FROM mercados')->fetchAll();
-    $repStmt = $this->db->prepare('INSERT INTO representantes_legais (mercado_id, nome, cpf, data_nascimento) VALUES (:mid, :nome, :cpf, :nasc)');
-    $addrStmt = $this->db->prepare('INSERT INTO endereco_mercado (mercado_id, rua, numero, complemento, bairro, cidade, estado, cep, latitude, longitude, principal) VALUES (:mid, :rua, :numero, :comp, :bairro, :cidade, :estado, :cep, :lat, :lng, :principal)');
-    foreach ($mercados as $m) {
-            $repStmt->execute([
-                ':mid' => $m['id'],
-                ':nome' => $this->faker->name(),
-                ':cpf' => $this->generateCpf(),
-                ':nasc' => $this->faker->date('Y-m-d', '-21 years'),
-            ]);
+        // Get created mercados
+        $mercados = $this->getAll('mercados');
+        
+        // Create representantes and endereços for each mercado
+        foreach ($mercados as $mercado) {
+            // Representante legal
+            $repData = [
+                'mercado_id' => $mercado['id'],
+                'nome' => $this->faker->name(),
+                'cpf' => $this->generateCpf(),
+                'data_nascimento' => $this->faker->date('Y-m-d', '-21 years')
+            ];
+            $this->db->insert('representantes_legais', $repData);
 
-            $addrStmt->execute([
-                ':mid' => $m['id'],
-                ':rua' => $this->faker->streetName(),
-                ':numero' => (string)$this->faker->buildingNumber(),
-                ':comp' => null,
-                ':bairro' => $this->faker->citySuffix(),
-                ':cidade' => $this->faker->city(),
-                ':estado' => 'SP',
-                ':cep' => $this->faker->postcode(),
-                ':lat' => $this->faker->latitude(-23.7, -23.4),
-                ':lng' => $this->faker->longitude(-46.8, -46.3),
-                ':principal' => 1,
-            ]);
+            // Endereço do mercado
+            $addrData = [
+                'mercado_id' => $mercado['id'],
+                'rua' => $this->faker->streetName(),
+                'numero' => (string)$this->faker->buildingNumber(),
+                'complemento' => null,
+                'bairro' => $this->faker->citySuffix(),
+                'cidade' => $this->faker->city(),
+                'estado' => 'SP',
+                'cep' => $this->faker->postcode(),
+                'latitude' => $this->faker->latitude(-23.7, -23.4),
+                'longitude' => $this->faker->longitude(-46.8, -46.3),
+                'principal' => 1
+            ];
+            $this->db->insert('endereco_mercado', $addrData);
         }
     }
 }

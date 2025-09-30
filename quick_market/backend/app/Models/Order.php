@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Database\Database;
 
 class Order {
-    private \PDO $db;
+    private \App\Database\SupabaseClient $db;
 
     public function __construct()
     {
@@ -15,47 +15,50 @@ class Order {
     public function create(array $payload): array
     {
         $numero = $payload['numero_pedido'] ?? 'PED-' . strtoupper(bin2hex(random_bytes(4)));
-    $sql = "INSERT INTO pedidos (usuario_id, mercado_id, numero_pedido, status, total, frete, desconto_aplicado, observacoes)
-        VALUES (:uid, :mid, :num, :status, :total, :frete, :desc, :obs)";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([
-        ':uid' => (int)$payload['usuario_id'],
-        ':mid' => (int)$payload['mercado_id'],
-        ':num' => $numero,
-        ':status' => $payload['status'] ?? 'pendente',
-        ':total' => (float)($payload['total'] ?? 0),
-        ':frete' => (float)($payload['frete'] ?? 0),
-        ':desc' => (float)($payload['desconto_aplicado'] ?? 0),
-        ':obs' => $payload['observacoes'] ?? null,
-    ]);
-        $id = (int)$this->db->lastInsertId();
-        $pedido = $this->findById($id);
-        return $pedido ?? ['id' => $id, 'numero_pedido' => $numero];
+        
+        $data = [
+            'usuario_id' => (int)$payload['usuario_id'],
+            'mercado_id' => (int)$payload['mercado_id'],
+            'numero_pedido' => $numero,
+            'status' => $payload['status'] ?? 'pendente',
+            'total' => (float)($payload['total'] ?? 0),
+            'frete' => (float)($payload['frete'] ?? 0),
+            'desconto_aplicado' => (float)($payload['desconto_aplicado'] ?? 0),
+            'observacoes' => $payload['observacoes'] ?? null,
+        ];
+
+        $result = $this->db->insert('pedidos', $data);
+        
+        if (!empty($result)) {
+            return $result[0];
+        }
+        
+        return ['numero_pedido' => $numero];
     }
 
     public function addPayment(array $tx): array
     {
-        $sql = "INSERT INTO pagamentos (pedido_id, forma_pagamento_id, valor, status, transacao_id)
-                VALUES (:pid, :fpid, :valor, :status, :txid)";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':pid' => (int)$tx['pedido_id'],
-            ':fpid' => (int)$tx['forma_pagamento_id'],
-            ':valor' => (float)$tx['valor'],
-            ':status' => $tx['status'] ?? 'pendente',
-            ':txid' => $tx['transacao_id'] ?? null,
-        ]);
-        $id = (int)$this->db->lastInsertId();
-        $row = $this->db->query("SELECT * FROM pagamentos WHERE id = " . (int)$id)->fetch();
-        return $row ?: ['id' => $id];
+        $data = [
+            'pedido_id' => (int)$tx['pedido_id'],
+            'forma_pagamento_id' => (int)$tx['forma_pagamento_id'],
+            'valor' => (float)$tx['valor'],
+            'status' => $tx['status'] ?? 'pendente',
+            'transacao_id' => $tx['transacao_id'] ?? null,
+        ];
+
+        $result = $this->db->insert('pagamentos', $data);
+        
+        if (!empty($result)) {
+            return $result[0];
+        }
+        
+        return ['id' => null];
     }
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->db->prepare("SELECT * FROM pedidos WHERE id = :id LIMIT 1");
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch();
-        return $row ?: null;
+        $result = $this->db->select('pedidos', ['id' => $id], ['limit' => 1]);
+        return !empty($result) ? $result[0] : null;
     }
 }
 

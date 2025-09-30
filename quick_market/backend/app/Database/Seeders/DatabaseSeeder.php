@@ -45,11 +45,17 @@ final class DatabaseSeeder extends Seeder
             'sessao_usuario','carrinho_usuario','endereco_usuario','contatos','usuarios','imagens'
         ];
 
-        $this->db->exec('SET FOREIGN_KEY_CHECKS=0');
+        // For Supabase, we'll delete all records from each table
+        // Note: Supabase doesn't support TRUNCATE with foreign key constraints like MySQL
         foreach ($tables as $table) {
-            $this->db->exec("TRUNCATE TABLE `$table`");
+            try {
+                // Delete all records from the table
+                $this->db->delete($table, []);
+            } catch (\Exception $e) {
+                // If table doesn't exist or has constraints, continue
+                echo "Warning: Could not truncate table $table: " . $e->getMessage() . "\n";
+            }
         }
-        $this->db->exec('SET FOREIGN_KEY_CHECKS=1');
     }
 }
 
