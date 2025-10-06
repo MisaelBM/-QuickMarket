@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Cliente" as Customer
+actor "Vendedor" as Seller
+actor "Administrador" as Admin
+
+package "QuickMarket" {
+  usecase "Navegar Produtos" as UC_Browse
+  usecase "Buscar Produtos" as UC_Search
+  usecase "Ver Produto" as UC_View
+  usecase "Adicionar ao Carrinho" as UC_AddCart
+  usecase "Finalizar Compra" as UC_Checkout
+  usecase "Pagamento" as UC_Payment
+  usecase "Autenticar / Login" as UC_Login
+  usecase "Ver Pedidos" as UC_ViewOrders
+  usecase "Gerenciar Produtos" as UC_ManageProducts
+  usecase "Gerenciar Usuários" as UC_ManageUsers
+}
+
+Customer --> UC_Browse
+Customer --> UC_Search
+Customer --> UC_View
+Customer --> UC_AddCart
+Customer --> UC_Checkout
+Customer --> UC_Login
+Customer --> UC_ViewOrders
+
+UC_Checkout .> UC_Payment : includes
+
+Seller --> UC_ManageProducts
+Seller --> UC_Login
+
+Admin --> UC_ManageProducts
+Admin --> UC_ManageUsers
+Admin --> UC_Login
+
+@enduml
