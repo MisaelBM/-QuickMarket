@@ -1,23 +1,47 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 "use client";
-
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [erro, setErro] = useState("");
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Lógica de autenticação aqui
+        setLoading(true);
+        setErro("");
+
         if (!email || !senha) {
             setErro("Preencha todos os campos.");
+            setLoading(false);
             return;
         }
-        setErro("");
-        // Redirecionar ou autenticar usuário
+
+        try {
+            const response = await api.post("/auth/login", {
+                email,
+                senha
+            });
+
+            const { token, usuario } = response.data;
+            
+            // Salvar token e dados do usuário
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(usuario));
+            
+            // Redirecionar para a página inicial
+            router.push('/');
+        } catch (error: any) {
+            setErro(error.response?.data?.error || "Erro ao fazer login");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -38,6 +62,7 @@ export default function LoginPage() {
                             onChange={e => setEmail(e.target.value)}
                             required
                             autoFocus
+                            disabled={loading}
                         />
                     </div>
                     <div>
@@ -50,6 +75,7 @@ export default function LoginPage() {
                             value={senha}
                             onChange={e => setSenha(e.target.value)}
                             required
+                            disabled={loading}
                         />
                     </div>
                     {erro && (
@@ -57,14 +83,15 @@ export default function LoginPage() {
                     )}
                     <button
                         type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition disabled:opacity-50"
+                        disabled={loading}
                     >
-                        Entrar
+                        {loading ? "Entrando..." : "Entrar"}
                     </button>
                 </form>
                 <div className="mt-6 text-center text-sm text-gray-600">
                     Não tem uma conta?{" "}
-                    <Link href="/register" className="text-green-700 hover:underline">
+                    <Link href="/cadastro" className="text-green-700 hover:underline">
                         Cadastre-se
                     </Link>
                 </div>

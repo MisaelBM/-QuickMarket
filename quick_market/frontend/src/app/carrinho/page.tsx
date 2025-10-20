@@ -1,34 +1,55 @@
 "use client"
 import * as React from "react";
-import axios from "axios";
+import { useRouter } from "next/navigation";
 import HeaderBar from "@/components/ui/headerBar";
-import type { ProdutoCarrinho } from "@/types";
+import api from "@/lib/api";
 
-const fetchCarrinho = async (): Promise<ProdutoCarrinho[]> => {
-	const response = await axios.get("/cart/");
-	return response.data;
+type ProdutoCarrinho = {
+	id: number;
+	nome: string;
+	preco: number;
+	quantidade: number;
+	imagem: string;
+	mercado: string;
+	observacoes?: string;
+	subtotal: number;
 };
 
 export default function CarrinhoPage() {
 	const [carrinho, setCarrinho] = React.useState<ProdutoCarrinho[]>([]);
+	const [loading, setLoading] = React.useState(true);
+	const [error, setError] = React.useState<string | null>(null);
+	const router = useRouter();
 
-	React.useEffect(() => {
-		fetchCarrinho().then(setCarrinho);
-	}, []);
-
-	const adicionarItem = async (produto: ProdutoCarrinho) => {
+	const fetchCarrinho = async (): Promise<ProdutoCarrinho[]> => {
 		try {
-			const response = await axios.post("/cart/", produto);
-			setCarrinho(response.data);
-		} catch (error) {
-			console.error("Erro ao adicionar item:", error);
+			const response = await api.get("/carrinho/");
+			return response.data;
+		} catch (error: any) {
+			if (error.response?.status === 401) {
+				router.push('/login');
+				return [];
+			}
+			throw error;
 		}
 	};
 
+	React.useEffect(() => {
+		fetchCarrinho()
+			.then(setCarrinho)
+			.catch((error) => {
+				console.error("Erro ao buscar carrinho:", error);
+				setError("Erro ao carregar carrinho");
+			})
+			.finally(() => setLoading(false));
+	}, []);
+
 	const alterarQuantidade = async (id: number, delta: number) => {
 		try {
-			const response = await axios.put("/cart/items/", { id, delta });
-			setCarrinho(response.data);
+			await api.put("/carrinho/items", { id, delta });
+			// Recarregar carrinho
+			const novoCarrinho = await fetchCarrinho();
+			setCarrinho(novoCarrinho);
 		} catch (error) {
 			console.error("Erro ao alterar quantidade:", error);
 		}
@@ -36,17 +57,40 @@ export default function CarrinhoPage() {
 
 	const removerItem = async (id: number) => {
 		try {
-			const response = await axios.delete(`/cart/items/remove`, { data: { id } });
-			setCarrinho(response.data);
+			await api.delete("/carrinho/items/remove", { data: { id } });
+			// Recarregar carrinho
+			const novoCarrinho = await fetchCarrinho();
+			setCarrinho(novoCarrinho);
 		} catch (error) {
 			console.error("Erro ao remover item:", error);
 		}
 	};
 
+	const finalizarCompra = () => {
+		if (carrinho.length === 0) return;
+		router.push('/pagamento');
+	};
+
 	const total = carrinho.reduce(
-		(acc: number, item: ProdutoCarrinho) => acc + item.preco * item.quantidade,
+		(acc: number, item: ProdutoCarrinho) => acc + item.subtotal,
 		0
 	);
+
+	if (loading) {
+		return (
+			<>
+				<HeaderBar />
+				<main className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-200 py-10 px-2">
+					<div className="max-w-4xl mx-auto flex justify-center items-center h-64">
+						<div className="text-center">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+							<p className="text-gray-600">Carregando carrinho...</p>
+						</div>
+					</div>
+				</main>
+			</>
+		);
+	}
 
 	return (
 		<>
@@ -56,10 +100,23 @@ export default function CarrinhoPage() {
 					<h1 className="text-3xl font-extrabold text-blue-700 mb-2 drop-shadow text-center">
 						Seu Carrinho
 					</h1>
+					{error && (
+						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center">
+							{error}
+						</div>
+					)}
 					{carrinho.length === 0 ? (
-						<p className="text-center text-gray-500">
-							Adicione produtos ao seu carrinho para começar a fazer compras.
-						</p>
+						<div className="text-center py-12">
+							<p className="text-gray-500 text-lg mb-4">
+								Seu carrinho está vazio
+							</p>
+							<button 
+								onClick={() => router.push('/lista_mercados')}
+								className="px-6 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition"
+							>
+								Ver Mercados
+							</button>
+						</div>
 					) : (
 						<>
 							<div className="flex flex-col gap-6">
@@ -69,7 +126,7 @@ export default function CarrinhoPage() {
 										className="flex flex-col sm:flex-row items-center bg-white rounded-xl shadow-md p-4 gap-4 border border-gray-100"
 									>
 										<img
-											src={item.imagem}
+											src={item.imagem || "/placeholder-product.jpg"}
 											alt={item.nome}
 											className="w-24 h-24 object-cover rounded-lg"
 										/>
@@ -78,15 +135,24 @@ export default function CarrinhoPage() {
 												{item.nome}
 											</span>
 											<span className="text-sm text-gray-500">
+												{item.mercado}
+											</span>
+											<span className="text-sm text-gray-500">
 												Preço: {" "}
 												<span className="font-semibold text-blue-700">
 													R$ {item.preco.toFixed(2)}
 												</span>
 											</span>
+											{item.observacoes && (
+												<span className="text-xs text-gray-400 italic">
+													Obs: {item.observacoes}
+												</span>
+											)}
 											<div className="flex items-center gap-2 mt-2">
 												<button
-													className="px-2 py-1 bg-blue-200 rounded-full text-blue-700 font-bold hover:bg-blue-300"
+													className="px-2 py-1 bg-blue-200 rounded-full text-blue-700 font-bold hover:bg-blue-300 disabled:opacity-50"
 													onClick={() => alterarQuantidade(item.id, -1)}
+													disabled={item.quantidade <= 1}
 												>
 													-
 												</button>
@@ -106,7 +172,7 @@ export default function CarrinhoPage() {
 											</div>
 										</div>
 										<div className="font-bold text-green-600 text-lg">
-											R$ {(item.preco * item.quantidade).toFixed(2)}
+											R$ {item.subtotal.toFixed(2)}
 										</div>
 									</div>
 								))}
@@ -115,7 +181,10 @@ export default function CarrinhoPage() {
 								<span className="text-xl font-bold text-blue-700">
 									Total: R$ {total.toFixed(2)}
 								</span>
-								<button className="px-8 py-3 bg-green-600 text-white rounded-full font-semibold text-lg hover:bg-green-700 transition">
+								<button 
+									onClick={finalizarCompra}
+									className="px-8 py-3 bg-green-600 text-white rounded-full font-semibold text-lg hover:bg-green-700 transition"
+								>
 									Finalizar Compra
 								</button>
 							</div>

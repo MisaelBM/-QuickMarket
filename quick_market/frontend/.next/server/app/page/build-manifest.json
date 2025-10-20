@@ -2,19 +2,19 @@
   "devFiles": [],
   "ampDevFiles": [],
   "polyfillFiles": [
-    "static/chunks/4cc42_next_dist_build_polyfills_polyfill-nomodule.js"
+    "static/chunks/9e63a_next_dist_build_polyfills_polyfill-nomodule.js"
   ],
   "lowPriorityFiles": [],
   "rootMainFiles": [
-    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_9abec0af._.js",
-    "static/chunks/4cc42_next_dist_compiled_react-dom_4c47b55d._.js",
-    "static/chunks/4cc42_next_dist_compiled_next-devtools_index_7462e842.js",
-    "static/chunks/4cc42_next_dist_compiled_84055881._.js",
-    "static/chunks/4cc42_next_dist_client_0e972dfc._.js",
-    "static/chunks/4cc42_next_dist_693666e8._.js",
-    "static/chunks/4cc42_@swc_helpers_cjs_3aec575a._.js",
-    "static/chunks/quick_market_frontend_a0ff3932._.js",
-    "static/chunks/turbopack-quick_market_frontend_573d6c35._.js"
+    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_b7f89d1b._.js",
+    "static/chunks/9e63a_next_dist_compiled_react-dom_be001806._.js",
+    "static/chunks/9e63a_next_dist_compiled_next-devtools_index_6d29157a.js",
+    "static/chunks/9e63a_next_dist_compiled_b6f6d782._.js",
+    "static/chunks/9e63a_next_dist_client_7bbd5bb0._.js",
+    "static/chunks/9e63a_next_dist_6d1d0b1b._.js",
+    "static/chunks/9e63a_@swc_helpers_cjs_3f3bb0bb._.js",
+    "static/chunks/Downloads_-QuickMarket_-QuickMarket_quick_market_frontend_a0ff3932._.js",
+    "static/chunks/turbopack-Downloads_-QuickMarket_-QuickMarket_quick_market_frontend_54dba33a._.js"
   ],
   "pages": {},
   "ampFirstPages": []

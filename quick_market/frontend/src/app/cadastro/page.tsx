@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
 
 'use client';
-
 
 export default function CadastroPage() {
     const [form, setForm] = useState({
@@ -10,23 +11,56 @@ export default function CadastroPage() {
         email: '',
         senha: '',
         confirmarSenha: '',
+        data_nascimento: '',
     });
 
     const [erro, setErro] = useState('');
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
         setErro('');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setErro('');
+
         if (form.senha !== form.confirmarSenha) {
             setErro('As senhas não coincidem.');
+            setLoading(false);
             return;
         }
-        // Aqui você pode adicionar a lógica de cadastro (API, etc)
-        alert('Cadastro realizado com sucesso!');
+
+        if (form.senha.length < 6) {
+            setErro('A senha deve ter pelo menos 6 caracteres.');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await api.post('/auth/register', {
+                nome: form.nome,
+                email: form.email,
+                senha: form.senha,
+                data_nascimento: form.data_nascimento || null
+            });
+
+            const { token, usuario } = response.data;
+            
+            // Salvar token e dados do usuário
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(usuario));
+            
+            // Redirecionar para a página inicial
+            router.push('/');
+        } catch (error: any) {
+            setErro(error.response?.data?.error || 'Erro ao criar conta');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -45,7 +79,8 @@ export default function CadastroPage() {
                             required
                             value={form.nome}
                             onChange={handleChange}
-                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                            disabled={loading}
+                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none disabled:opacity-50"
                         />
                     </div>
                     <div>
@@ -59,7 +94,22 @@ export default function CadastroPage() {
                             required
                             value={form.email}
                             onChange={handleChange}
-                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                            disabled={loading}
+                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="data_nascimento" className="block text-sm font-medium text-gray-700">
+                            Data de Nascimento (opcional)
+                        </label>
+                        <input
+                            id="data_nascimento"
+                            name="data_nascimento"
+                            type="date"
+                            value={form.data_nascimento}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none disabled:opacity-50"
                         />
                     </div>
                     <div>
@@ -73,7 +123,8 @@ export default function CadastroPage() {
                             required
                             value={form.senha}
                             onChange={handleChange}
-                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                            disabled={loading}
+                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none disabled:opacity-50"
                         />
                     </div>
                     <div>
@@ -87,15 +138,17 @@ export default function CadastroPage() {
                             required
                             value={form.confirmarSenha}
                             onChange={handleChange}
-                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                            disabled={loading}
+                            className="mt-1 w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none disabled:opacity-50"
                         />
                     </div>
                     {erro && <p className="text-sm text-red-500">{erro}</p>}
                     <button
                         type="submit"
-                        className="w-full rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition"
+                        disabled={loading}
+                        className="w-full rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition disabled:opacity-50"
                     >
-                        Cadastrar
+                        {loading ? 'Criando conta...' : 'Cadastrar'}
                     </button>
                 </form>
                 <p className="mt-4 text-center text-sm text-gray-600">
