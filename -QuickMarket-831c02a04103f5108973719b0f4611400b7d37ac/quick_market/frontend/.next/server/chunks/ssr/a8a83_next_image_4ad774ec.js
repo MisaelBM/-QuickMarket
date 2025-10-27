@@ -1,0 +1,8 @@
+module.exports = [
+"[project]/Downloads/-QuickMarket/-QuickMarket/-QuickMarket-831c02a04103f5108973719b0f4611400b7d37ac/quick_market/frontend/node_modules/next/image.js [app-ssr] (ecmascript)", ((__turbopack_context__, module, exports) => {
+
+module.exports = __turbopack_context__.r("[project]/Downloads/-QuickMarket/-QuickMarket/-QuickMarket-831c02a04103f5108973719b0f4611400b7d37ac/quick_market/frontend/node_modules/next/dist/shared/lib/image-external.js [app-ssr] (ecmascript)");
+}),
+];
+
+//# sourceMappingURL=a8a83_next_image_4ad774ec.js.map
